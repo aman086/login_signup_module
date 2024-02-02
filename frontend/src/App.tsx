@@ -4,7 +4,7 @@ import LoginForm from './components/authentication/Login';
 
 function App() {
   const [activeComponent, setActiveComponent] = useState<number | null>(null);
-
+  
   const handleClick = (componentNumber: number) => {
     setActiveComponent((prevActiveComponent) =>
       prevActiveComponent === componentNumber ? null : componentNumber
@@ -27,7 +27,7 @@ function App() {
         <button onClick={() => handleClick(2)}>Login Here</button>
 
         {activeComponent === 1 && <SignUpForm onSubmit={handleSignUp} />}
-        {activeComponent === 2 && <LoginForm onSubmit={handleLogin} />}
+        {activeComponent === 2 && <LoginForm onLogin={handleLogin} />}
       </div>
     </div>
   );

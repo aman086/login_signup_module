@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios, { AxiosError } from 'axios';
+import SuccessfulLogin from './afterLogin';
 
 interface LoginFormProps {
   onLogin: (name: string, password: string) => void;
@@ -8,23 +9,26 @@ interface LoginFormProps {
 const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
   const [name, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [username, setName] = useState<string | null>(null);
+  const [loginSuccess, setLoginSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     try {
-      const response = await axios.post('/api/login', { name , password });
+      const response = await axios.post('/api/login', { name, password });
       console.log(response);
-      
+
       if (response.status === 200) {
-        setName(name);
+        // If successful, set the login success state to true
+        setLoginSuccess(true);
+        // Call the parent component's onLogin function
+        onLogin(name, password);
       } else {
-        console.log("login failed")
+        // If not successful, display an error message
+        setError('Login failed');
+        console.log('Login failed');
       }
-
-
-      // If successful, call the parent component's onLogin function
-      onLogin(name, password);
     } catch (error: any) {
       console.error('Error:', error);
 
@@ -34,14 +38,22 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
       } else {
         console.error('Error setting up the request:', error.message);
       }
+
+      // Set the error state for displaying the error message
+      setError('Error occurred during login');
     }
   };
 
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-md shadow-md">
-      <h2 className="text-2xl font-semibold mb-6">Login</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
+      {loginSuccess ? (
+        // Render the SuccessfulLogin component after successful login
+        <SuccessfulLogin username={name} />
+      ) : (
+        <>
+          <h2 className="text-2xl font-semibold mb-6">Login</h2>
+          <form onSubmit={handleSubmit}>
+          <div className="mb-4">
           <label htmlFor="username" className="block text-gray-700 text-sm font-bold mb-2">
             Username
           </label>
@@ -69,21 +81,15 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
             required
           />
         </div>
-        <button
-          type="submit"
-          className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
-        >
-          Login
-        </button>
-      </form>
-
-
-      {username ? (
-        // Render the SuccessMessage component after successful login
-        <SuccessMessage username={username} />
-      ) : (
-        // Render the LoginForm component if not logged in
-        <LoginForm onLogin={handleSubmit} />
+            <button
+              type="submit"
+              className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
+            >
+              Login
+            </button>
+          </form>
+          {error && <p className="text-red-500">{error}</p>}
+        </>
       )}
     </div>
   );
